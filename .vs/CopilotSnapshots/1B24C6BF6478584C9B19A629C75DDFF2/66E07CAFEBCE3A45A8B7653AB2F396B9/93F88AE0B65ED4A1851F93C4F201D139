@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -54,13 +54,8 @@
   .row{display:grid;gap:10px;margin:8px 0}
   label{font-weight:600}
   input[type=text],input[type=number],select,textarea{
-    width:100%;
-    background:#fff;
-    border:1px solid var(--line);
-    color:var(--ink);
-    border-radius:10px;
-    padding:10px 12px;
-    outline:none;
+    width:100%;background:#0a1226;border:1px solid #1e293b;color:var(--ink);
+    border-radius:10px;padding:10px 12px;outline:none
   }
   textarea{min-height:84px;resize:vertical}
   .muted{color:var(--muted);font-size:.9rem}
@@ -120,7 +115,6 @@
 <div class="wrap">
   <header>
     <div class="flex" style="gap:12px">
-      <img src="FlywayLogo.png" alt="Redgate" style="height:36px;margin-right:12px;vertical-align:middle;">
       <h1>Flyway Demo Scoper</h1>
       <span class="pill">Opportunity + ROI</span>
     </div>

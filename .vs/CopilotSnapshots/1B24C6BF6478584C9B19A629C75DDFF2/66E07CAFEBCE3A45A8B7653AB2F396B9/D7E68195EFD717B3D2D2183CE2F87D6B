@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -6,44 +6,26 @@
 <title>Flyway Demo Scoper — v1</title>
 <style>
   :root{
-    --bg:#fff;
-    --card:#fff;
-    --ink:#222;
-    --muted:#888;
-    --accent:#cc0000;
-    --accent-2:#e60023;
-    --ok:#34d399;
-    --warn:#fbbf24;
-    --bad:#f87171;
-    --line:#e5e5e5;
+    --bg:#0f172a;--card:#111827;--ink:#e5e7eb;--muted:#94a3b8;--accent:#22d3ee;--accent-2:#38bdf8;
+    --ok:#34d399;--warn:#fbbf24;--bad:#f87171;--line:#1f2937;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
-    margin:0;
-    background:#fff;
-    color:var(--ink);
-    font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+    margin:0;background:linear-gradient(180deg,#0b1226,#0a0f1f 50%,#0b1226);
+    color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
   }
   .wrap{max-width:1080px;margin:auto;padding:24px}
   header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
   h1{font-size:1.4rem;margin:0;letter-spacing:.2px}
   .pill{
-    border:1px solid var(--accent);
-    background:#fff;
-    color:var(--accent);
-    padding:6px 10px;
-    border-radius:999px;
-    font-size:.85rem;
+    border:1px solid #1f2937;background:#0b1226;color:var(--muted);padding:6px 10px;border-radius:999px;font-size:.85rem
   }
   .grid{display:grid;gap:16px}
   .panel{
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:16px;
-    padding:18px 16px;
-    box-shadow:0 8px 24px rgba(0,0,0,.08);
-    margin-top:32px;
+    background:linear-gradient(180deg,#0f172a,#0e162c);
+    border:1px solid var(--line);border-radius:16px;padding:18px 16px;box-shadow:0 8px 24px rgba(0,0,0,.25);
+    margin-top: 32px;
   }
   .panel:first-of-type {
     margin-top: 0;
@@ -54,73 +36,40 @@
   .row{display:grid;gap:10px;margin:8px 0}
   label{font-weight:600}
   input[type=text],input[type=number],select,textarea{
-    width:100%;
-    background:#fff;
-    border:1px solid var(--line);
-    color:var(--ink);
-    border-radius:10px;
-    padding:10px 12px;
-    outline:none;
+    width:100%;background:#0a1226;border:1px solid #1e293b;color:var(--ink);
+    border-radius:10px;padding:10px 12px;outline:none
   }
   textarea{min-height:84px;resize:vertical}
   .muted{color:var(--muted);font-size:.9rem}
   .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .btn{
     background:linear-gradient(180deg,var(--accent),var(--accent-2));
-    border:none;
-    color:#fff;
-    padding:10px 14px;
-    border-radius:12px;
-    font-weight:700;
-    cursor:pointer;
+    border:none;color:#00131a;padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer
   }
-  .btn.secondary{
-    background:#fff;
-    color:var(--accent);
-    border:1px solid var(--accent);
-  }
-  .btn.ghost{
-    background:transparent;
-    color:var(--muted);
-    border:1px dashed var(--accent);
-  }
+  .btn.secondary{background:#0b1226;color:var(--ink);border:1px solid #1f2937}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px dashed #334155}
   .btn:disabled{opacity:.5;cursor:not-allowed}
-  .section-title{
-    color:var(--accent);
-  }
+  .section-title{font-size:1.05rem;font-weight:800;margin:2px 0 8px}
   .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   @media (max-width:900px){.cols{grid-template-columns:1fr}}
   hr{border:none;border-top:1px solid #1f2937;margin:8px 0}
   .progress{height:8px;background:#0a1226;border:1px solid #1f2937;border-radius:999px;overflow:hidden}
   .progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
   .chips{display:flex;gap:8px;flex-wrap:wrap}
-  .chip{
-    background:#fff;
-    border:1px solid var(--accent);
-    color:var(--accent);
-  }
+  .chip{padding:6px 10px;border-radius:999px;background:#0b1226;border:1px solid #243244;font-size:.85rem}
   .badge{padding:2px 8px;border-radius:999px;font-weight:700}
   .ok{background:rgba(52,211,153,.15);color:#86efac}
   .warn{background:rgba(251,191,36,.15);color:#fde68a}
   .bad{background:rgba(248,113,113,.15);color:#fecaca}
-  .summary pre{
-    background:#fff;
-    color:var(--ink);
-    border:1px solid var(--accent);
-  }
+  .summary pre{white-space:pre-wrap;background:#0a1226;padding:12px;border-radius:12px;border:1px solid #1f2937}
   .toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-  .kbd{
-    background:#fff;
-    border:1px solid var(--accent);
-    color:var(--accent);
-  }
+  .kbd{font:600 .85rem ui-monospace,SFMono-Regular,Menlo,monospace;background:#0a1226;border:1px solid #243244;padding:2px 6px;border-radius:6px;color:#9ca3af}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div class="flex" style="gap:12px">
-      <img src="FlywayLogo.png" alt="Redgate" style="height:36px;margin-right:12px;vertical-align:middle;">
       <h1>Flyway Demo Scoper</h1>
       <span class="pill">Opportunity + ROI</span>
     </div>
