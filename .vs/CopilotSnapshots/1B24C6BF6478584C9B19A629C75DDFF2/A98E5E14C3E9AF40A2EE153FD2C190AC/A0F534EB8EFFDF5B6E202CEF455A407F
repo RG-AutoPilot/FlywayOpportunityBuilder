@@ -1,0 +1,521 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Flyway Demo Scoper — v1</title>
+<style>
+  :root{
+    --bg:#0f172a;--card:#111827;--ink:#e5e7eb;--muted:#94a3b8;--accent:#22d3ee;--accent-2:#38bdf8;
+    --ok:#34d399;--warn:#fbbf24;--bad:#f87171;--line:#1f2937;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:linear-gradient(180deg,#0b1226,#0a0f1f 50%,#0b1226);
+    color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+  }
+  .wrap{max-width:1080px;margin:auto;padding:24px}
+  header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+  h1{font-size:1.4rem;margin:0;letter-spacing:.2px}
+  .pill{
+    border:1px solid #1f2937;background:#0b1226;color:var(--muted);padding:6px 10px;border-radius:999px;font-size:.85rem
+  }
+  .grid{display:grid;gap:16px}
+  .panel{
+    background:linear-gradient(180deg,#0f172a,#0e162c);
+    border:1px solid var(--line);border-radius:16px;padding:18px 16px;box-shadow:0 8px 24px rgba(0,0,0,.25);
+    margin-top: 32px;
+  }
+  .panel:first-of-type {
+    margin-top: 0;
+  }
+  .panel[data-step="1"] {
+    margin-top: 32px;
+  }
+  .row{display:grid;gap:10px;margin:8px 0}
+  label{font-weight:600}
+  input[type=text],input[type=number],select,textarea{
+    width:100%;background:#0a1226;border:1px solid #1e293b;color:var(--ink);
+    border-radius:10px;padding:10px 12px;outline:none
+  }
+  textarea{min-height:84px;resize:vertical}
+  .muted{color:var(--muted);font-size:.9rem}
+  .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{
+    background:linear-gradient(180deg,var(--accent),var(--accent-2));
+    border:none;color:#00131a;padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer
+  }
+  .btn.secondary{background:#0b1226;color:var(--ink);border:1px solid #1f2937}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px dashed #334155}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .section-title{font-size:1.05rem;font-weight:800;margin:2px 0 8px}
+  .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  @media (max-width:900px){.cols{grid-template-columns:1fr}}
+  hr{border:none;border-top:1px solid #1f2937;margin:8px 0}
+  .progress{height:8px;background:#0a1226;border:1px solid #1f2937;border-radius:999px;overflow:hidden}
+  .progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{padding:6px 10px;border-radius:999px;background:#0b1226;border:1px solid #243244;font-size:.85rem}
+  .badge{padding:2px 8px;border-radius:999px;font-weight:700}
+  .ok{background:rgba(52,211,153,.15);color:#86efac}
+  .warn{background:rgba(251,191,36,.15);color:#fde68a}
+  .bad{background:rgba(248,113,113,.15);color:#fecaca}
+  .summary pre{white-space:pre-wrap;background:#0a1226;padding:12px;border-radius:12px;border:1px solid #1f2937}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .kbd{font:600 .85rem ui-monospace,SFMono-Regular,Menlo,monospace;background:#0a1226;border:1px solid #243244;padding:2px 6px;border-radius:6px;color:#9ca3af}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="flex" style="gap:12px">
+      <h1>Flyway Demo Scoper</h1>
+      <span class="pill">Opportunity + ROI</span>
+    </div>
+    <div class="toolbar">
+      <button class="btn secondary" id="btnLoad">Upload JSON</button>
+      <button class="btn secondary" id="btnSave">Download JSON</button>
+      <button class="btn ghost" id="btnPrint">Print / PDF</button>
+    </div>
+  </header>
+
+  <div class="panel">
+    <div class="section-title">How this works</div>
+    <p class="muted">Use this collaboratively on a call to capture how the team handles database changes today, their pains, and goals. The page estimates time savings (ROI) from whatever data you provide. You can skip anything and return later — it autosaves.</p>
+    <div class="progress" aria-label="Progress"><i id="progress" style="width:8%"></i></div>
+  </div>
+
+  <!-- Company & Context -->
+  <section class="panel" data-step="1">
+    <div class="section-title">1) Company & Context</div>
+    <div class="cols">
+      <div class="row">
+        <label>Company / Project</label>
+        <input id="company" type="text" placeholder="Acme Corp — Payments DB" />
+      </div>
+      <div class="row">
+        <label>Primary DB platforms</label>
+        <input id="dbPlatforms" type="text" placeholder="SQL Server, Oracle, Postgres…" />
+        <div class="muted">Comma separated.</div>
+      </div>
+    </div>
+    <div class="cols">
+      <div class="row">
+        <label>Hosting</label>
+        <select id="hosting">
+          <option value="">Select…</option>
+          <option>On-prem</option>
+          <option>Cloud</option>
+          <option>Managed (e.g., Azure SQL MI)</option>
+          <option>Warehouse</option>
+          <option>Mixed</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Release cadence</label>
+        <select id="cadence">
+          <option value="">Select…</option>
+          <option>Daily</option><option>Weekly</option><option>Biweekly</option>
+          <option>Monthly</option><option>Quarterly</option><option>Ad hoc</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <label>Why Flyway / outcomes that matter most</label>
+      <textarea id="why" placeholder="e.g., faster releases, fewer failed deployments, better audit"></textarea>
+    </div>
+    <div class="row">
+      <label>Key initiatives</label>
+      <input id="initiatives" type="text" placeholder="Cloud migration, modernization, compliance…" />
+    </div>
+  </section>
+
+  <!-- Development & Version Control -->
+  <section class="panel" data-step="2">
+    <div class="section-title">2) Development & Version Control</div>
+    <div class="row">
+      <label>How do you currently version control your DB changes?</label>
+      <select id="dev_vc_method">
+        <option value="">Select…</option>
+        <option>No version control</option>
+        <option>Manual scripts (shared)</option>
+        <option>Git/TFVC</option>
+        <option>State-based tool</option>
+        <option>Migrations</option>
+        <option>Other / Mixed</option>
+      </select>
+    </div>
+    <div class="cols">
+      <div class="row">
+        <label>Time to capture a change into VC (per change, per dev)</label>
+        <input id="dev_vc_time_mins" type="number" min="0" placeholder="e.g., 20" />
+        <div class="muted">Minutes</div>
+      </div>
+      <div class="row">
+        <label># developers making DB changes</label>
+        <input id="dev_count" type="number" min="0" placeholder="e.g., 6" />
+      </div>
+    </div>
+    <div class="row">
+      <label>Pains (select any)</label>
+      <div class="chips" id="dev_pains">
+        <label class="chip"><input type="checkbox" value="Env sync is hard" /> Env sync is hard</label>
+        <label class="chip"><input type="checkbox" value="Reviews are difficult" /> Reviews are difficult</label>
+        <label class="chip"><input type="checkbox" value="Merge conflicts" /> Merge conflicts</label>
+        <label class="chip"><input type="checkbox" value="Unclear ownership" /> Unclear ownership</label>
+        <label class="chip"><input type="checkbox" value="Time-consuming capture" /> Time-consuming capture</label>
+      </div>
+    </div>
+    <div class="row">
+      <label>Goal</label>
+      <input id="dev_goal" type="text" placeholder="e.g., keep dev DBs in sync, clearer history, faster capture" />
+    </div>
+  </section>
+
+  <!-- Deployment Script Generation -->
+  <section class="panel" data-step="3">
+    <div class="section-title">3) Deployment Script Generation</div>
+    <div class="row">
+      <label>How do you generate deployment scripts?</label>
+      <select id="scripts_method">
+        <option value="">Select…</option>
+        <option>Written by hand</option>
+        <option>State-based compare tool</option>
+        <option>Generated migrations</option>
+        <option>Mixed</option>
+      </select>
+    </div>
+    <div class="cols">
+      <div class="row">
+        <label>Prep time per release (scripts)</label>
+        <input id="scripts_prep_mins" type="number" min="0" placeholder="e.g., 120" />
+        <div class="muted">Minutes</div>
+      </div>
+      <div class="row">
+        <label>Releases per month</label>
+        <input id="releases_per_month" type="number" min="0" placeholder="e.g., 6" />
+      </div>
+    </div>
+    <div class="row">
+      <label>Include static/reference data?</label>
+      <select id="static_data">
+        <option value="">Select…</option>
+        <option>Yes</option><option>Sometimes</option><option>No</option><option>Unsure</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>Pains</label>
+      <div class="chips" id="scripts_pains">
+        <label class="chip"><input type="checkbox" value="Takes too long" /> Takes too long</label>
+        <label class="chip"><input type="checkbox" value="Fails in higher envs" /> Fails in higher envs</label>
+        <label class="chip"><input type="checkbox" value="Hard to consolidate" /> Hard to consolidate</label>
+        <label class="chip"><input type="checkbox" value="Missed static data" /> Missed static data</label>
+        <label class="chip"><input type="checkbox" value="Last-minute rush" /> Last-minute rush</label>
+      </div>
+    </div>
+    <div class="row">
+      <label>Goal</label>
+      <input id="scripts_goal" type="text" placeholder="e.g., reduce errors, include schema+data, automate creation" />
+    </div>
+  </section>
+
+  <!-- Deployment & Release -->
+  <section class="panel" data-step="4">
+    <div class="section-title">4) Deployment & Release</div>
+    <div class="row">
+      <label>How do you deploy to higher environments?</label>
+      <select id="deploy_method">
+        <option value="">Select…</option>
+        <option>Manual (SSMS/sqlplus)</option>
+        <option>Custom scripts</option>
+        <option>CI/CD pipeline</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="cols">
+      <div class="row">
+        <label>Time per deployment (end-to-end)</label>
+        <input id="deploy_mins" type="number" min="0" placeholder="e.g., 60" />
+        <div class="muted">Minutes</div>
+      </div>
+      <div class="row">
+        <label>Failed deployments / month</label>
+        <input id="deploy_failures" type="number" min="0" placeholder="e.g., 1" />
+      </div>
+    </div>
+    <div class="row">
+      <label>Pains</label>
+      <div class="chips" id="deploy_pains">
+        <label class="chip"><input type="checkbox" value="Downtime risk" /> Downtime risk</label>
+        <label class="chip"><input type="checkbox" value="No pre-deploy visibility" /> No pre-deploy visibility</label>
+        <label class="chip"><input type="checkbox" value="Environment drift" /> Environment drift</label>
+        <label class="chip"><input type="checkbox" value="Weak rollback" /> Weak rollback</label>
+        <label class="chip"><input type="checkbox" value="Compliance friction" /> Compliance friction</label>
+      </div>
+    </div>
+    <div class="row">
+      <label>Goal</label>
+      <input id="deploy_goal" type="text" placeholder="e.g., safer automated releases, check reports, rollback options" />
+    </div>
+  </section>
+
+  <!-- Priorities -->
+  <section class="panel" data-step="5">
+    <div class="section-title">5) Priorities & Success</div>
+    <div class="row">
+      <label>If you could fix one thing first, what would it be?</label>
+      <input id="fix_one" type="text" placeholder="Your #1 pain to solve" />
+    </div>
+    <div class="row">
+      <label>90-day success looks like…</label>
+      <input id="success_90" type="text" placeholder="Faster releases, fewer failures, clearer ownership, auditability…" />
+    </div>
+  </section>
+
+  <!-- ROI Snapshot -->
+  <section class="panel" data-step="6" id="roiPanel">
+    <div class="section-title">ROI Snapshot (estimates)</div>
+    <div class="muted">Based on provided times and volumes. Adjust inputs above; this recalculates live.</div>
+    <div class="grid" id="roiStats" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:10px">
+      <div class="panel" style="padding:12px">
+        <div class="muted">Dev sync & capture savings</div>
+        <div id="roiDev" class="badge ok" style="display:inline-block;margin-top:6px">—</div>
+      </div>
+      <div class="panel" style="padding:12px">
+        <div class="muted">Script prep savings</div>
+        <div id="roiScripts" class="badge ok" style="display:inline-block;margin-top:6px">—</div>
+      </div>
+      <div class="panel" style="padding:12px">
+        <div class="muted">Deployment savings</div>
+        <div id="roiDeploy" class="badge ok" style="display:inline-block;margin-top:6px">—</div>
+      </div>
+    </div>
+    <div class="chips" style="margin-top:10px">
+      <span class="chip">Assumes ~50% time reduction with Flyway when pains are present.</span>
+      <span class="chip">Tune later with your own benchmarks.</span>
+    </div>
+  </section>
+
+  <!-- Summary -->
+  <section class="panel summary" data-step="7">
+    <div class="section-title">Engineer-Ready Brief</div>
+    <div id="summary" class="row">
+      <pre>Fill in details above to generate a summary…</pre>
+    </div>
+    <div class="flex" style="justify-content:flex-end;margin-top:10px">
+      <button class="btn secondary" id="btnCopy">Copy Summary</button>
+    </div>
+  </section>
+
+  <footer class="flex" style="justify-content:space-between;margin:16px 0">
+    <div class="muted">Tip: <span class="kbd">Ctrl/Cmd + S</span> to quick-save JSON. Open resources via the top link in your version.</div>
+    <div class="flex">
+      <button class="btn secondary" id="btnClear">Clear Form</button>
+      <button class="btn" id="btnRecalc">Recalculate & Update Summary</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const el = id=>document.getElementById(id);
+  const inputs = [
+    "company","dbPlatforms","hosting","cadence","why","initiatives",
+    "dev_vc_method","dev_vc_time_mins","dev_count","dev_goal",
+    "scripts_method","scripts_prep_mins","releases_per_month","static_data","scripts_goal",
+    "deploy_method","deploy_mins","deploy_failures","deploy_goal",
+    "fix_one","success_90"
+  ];
+  const groups = {
+    dev_pains: "#dev_pains input[type=checkbox]",
+    scripts_pains: "#scripts_pains input[type=checkbox]",
+    deploy_pains: "#deploy_pains input[type=checkbox]"
+  };
+
+  // Load / Save
+  function readState(){
+    const state={};
+    inputs.forEach(k=>state[k]=el(k)?.value||"");
+    for(const g in groups){
+      state[g]=[...document.querySelectorAll(groups[g])]
+        .filter(c=>c.checked).map(c=>c.value);
+    }
+    return state;
+  }
+  function writeState(state){
+    inputs.forEach(k=>{ if(el(k) && state[k]!=null) el(k).value = state[k]; });
+    for(const g in groups){
+      const set=new Set(state[g]||[]);
+      document.querySelectorAll(groups[g]).forEach(c=>c.checked=set.has(c.value));
+    }
+    recalc();
+  }
+  function saveLocal(){ localStorage.setItem("flyway_scoper_v1", JSON.stringify(readState())); }
+  function loadLocal(){ const raw=localStorage.getItem("flyway_scoper_v1"); if(raw){ try{ writeState(JSON.parse(raw)); }catch{} } }
+
+  // ROI model (simple v1)
+  // Assumptions: if pains present, Flyway can save ~50% of the given time buckets.
+  function roiMinutes(){
+    const s = readState();
+    const devPainScore = (s.dev_pains||[]).length;
+    const scriptsPainScore = (s.scripts_pains||[]).length;
+    const deployPainScore = (s.deploy_pains||[]).length;
+
+    const devMinsPerChange = +s.dev_vc_time_mins||0;
+    const devs = +s.dev_count||0;
+
+    const scriptsPrepMins = +s.scripts_prep_mins||0;
+    const releases = +s.releases_per_month||0;
+
+    const deployMins = +s.deploy_mins||0;
+    const deployFailures = +s.deploy_failures||0;
+
+    const devMonthlyChanges = Math.max(1, Math.round(devs*4)); // crude: ~4 changes/dev/month
+    const devBase = devMinsPerChange * devMonthlyChanges;
+    const devSave = devPainScore>0 ? Math.round(devBase*0.5) : 0;
+
+    const scriptsBase = scriptsPrepMins * releases;
+    const scriptsSave = scriptsPainScore>0 ? Math.round(scriptsBase*0.5) : 0;
+
+    const deployBase = (deployMins * Math.max(1,releases)) + (deployFailures*30); // add 30 mins per failure
+    const deploySave = deployPainScore>0 ? Math.round(deployBase*0.5) : 0;
+
+    return {devSave, scriptsSave, deploySave};
+  }
+
+  // Summary generator
+  function buildSummary(){
+    const s = readState();
+    const pains = {
+      Development: s.dev_pains||[],
+      "Script Generation": s.scripts_pains||[],
+      Deployment: s.deploy_pains||[]
+    };
+    const {devSave, scriptsSave, deploySave} = roiMinutes();
+    const totalSave = devSave+scriptsSave+deploySave;
+
+    const recs = [];
+    if((s.dev_pains||[]).length || s.dev_vc_method==="No version control"){
+      recs.push("Show Flyway Desktop change capture + Git history + dev DB sync");
+    }
+    if((s.scripts_pains||[]).length || s.scripts_method){
+      if(s.scripts_method==="Written by hand"){ recs.push("Generate deployment scripts automatically (state or migrations)"); }
+      recs.push("Validate before commit; include static data");
+    }
+    if((s.deploy_pains||[]).length || s.deploy_method){
+      recs.push("Pre-deploy check reports & dry run; drift detection across environments");
+      if(s.deploy_method!=="CI/CD pipeline") recs.push("Show CLI + pipeline snippet (Azure DevOps/GitHub Actions)");
+    }
+
+    const lines = [];
+    lines.push(`Company/Project: ${s.company||"—"}`);
+    lines.push(`DBs: ${s.dbPlatforms||"—"} | Hosting: ${s.hosting||"—"} | Cadence: ${s.cadence||"—"}`);
+    lines.push(`Why now: ${s.why||"—"}`);
+    if(s.initiatives) lines.push(`Initiatives: ${s.initiatives}`);
+
+    lines.push("\n— Development & Version Control —");
+    lines.push(`Method: ${s.dev_vc_method||"—"}`);
+    lines.push(`Pains: ${(pains.Development.length? pains.Development.join(", "):"—")}`);
+    lines.push(`Goal: ${s.dev_goal||"—"}`);
+
+    lines.push("\n— Deployment Script Generation —");
+    lines.push(`Method: ${s.scripts_method||"—"} | Static data: ${s.static_data||"—"}`);
+    lines.push(`Pains: ${(pains["Script Generation"].length? pains["Script Generation"].join(", "):"—")}`);
+    lines.push(`Goal: ${s.scripts_goal||"—"}`);
+
+    lines.push("\n— Deployment & Release —");
+    lines.push(`Method: ${s.deploy_method||"—"}`);
+    lines.push(`Pains: ${(pains.Deployment.length? pains.Deployment.join(", "):"—")}`);
+    lines.push(`Goal: ${s.deploy_goal||"—"}`);
+
+    lines.push("\n— Priorities —");
+    lines.push(`Fix first: ${s.fix_one||"—"}`);
+    lines.push(`90-day success: ${s.success_90||"—"}`);
+
+    lines.push("\n— ROI (monthly time saved, estimate) —");
+    lines.push(`Dev sync & capture: ${devSave} mins`);
+    lines.push(`Script prep: ${scriptsSave} mins`);
+    lines.push(`Deployment: ${deploySave} mins`);
+    lines.push(`Total: ${totalSave} mins (~${(totalSave/60).toFixed(1)} hours)`);
+
+    lines.push("\n— Demo Recommendations —");
+    if(recs.length){ lines.push("• " + recs.join("\n• ")); }
+    else { lines.push("Tailor based on further discovery."); }
+
+    return lines.join("\n");
+  }
+
+  function recalc(){
+    // Update progress
+    const filled = inputs.reduce((n,k)=> n + (el(k)?.value?1:0), 0);
+    const pct = Math.min(100, Math.round((filled/(inputs.length))*100));
+    document.getElementById("progress").style.width = Math.max(6,pct) + "%";
+
+    // Update ROI badges
+    const {devSave, scriptsSave, deploySave} = roiMinutes();
+    el("roiDev").textContent = (devSave? `${devSave} mins/mo` : "—");
+    el("roiScripts").textContent = (scriptsSave? `${scriptsSave} mins/mo` : "—");
+    el("roiDeploy").textContent = (deploySave? `${deploySave} mins/mo` : "—");
+
+    // Update summary
+    el("summary").innerHTML = `<pre>${buildSummary()}</pre>`;
+
+    saveLocal();
+  }
+
+  // Wire events
+  inputs.forEach(k=> el(k)?.addEventListener("input", recalc));
+  Object.values(groups).forEach(sel => {
+    document.querySelectorAll(sel).forEach(c=> c.addEventListener("change", recalc));
+  });
+
+  document.getElementById("btnRecalc").addEventListener("click", recalc);
+
+  document.getElementById("btnCopy").addEventListener("click", async ()=>{
+    const text = buildSummary();
+    try{ await navigator.clipboard.writeText(text); alert("Summary copied to clipboard."); }
+    catch{ alert("Copy failed. Select the text and copy manually."); }
+  });
+
+  document.getElementById("btnSave").addEventListener("click", ()=>{
+    const blob = new Blob([JSON.stringify(readState(),null,2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "flyway-demo-scoper.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  document.getElementById("btnLoad").addEventListener("click", ()=>{
+    const inp = document.createElement("input");
+    inp.type="file"; inp.accept="application/json";
+    inp.onchange = e=>{
+      const file = e.target.files[0]; if(!file) return;
+      const fr = new FileReader();
+      fr.onload = ()=>{ try{ writeState(JSON.parse(fr.result)); }catch{ alert("Invalid JSON"); } };
+      fr.readAsText(file);
+    };
+    inp.click();
+  });
+
+  document.getElementById("btnPrint").addEventListener("click", ()=>window.print());
+  document.getElementById("btnClear").addEventListener("click", ()=>{
+    if(!confirm("Clear all fields?")) return;
+    localStorage.removeItem("flyway_scoper_v1");
+    document.querySelectorAll("input, textarea, select").forEach(n=>{
+      if(n.type==="checkbox") n.checked=false; else n.value="";
+    });
+    recalc();
+  });
+
+  // Quick save shortcut
+  document.addEventListener("keydown", (e)=>{
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="s"){ e.preventDefault(); document.getElementById("btnSave").click(); }
+  });
+
+  loadLocal(); recalc();
+})();
+</script>
+</body>
+</html>
